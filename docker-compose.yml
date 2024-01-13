@@ -5,12 +5,23 @@ services:
     container_name: homeassistant
     image: "homeassistant/home-assistant:latest"
     volumes:
-    - /home/media2/docker/home/homeassistant-config:/config
-    - /etc/localtime:/etc/localtime:ro
+      - /home/media2/docker/home/homeassistant-config:/config
+      - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     privileged: true
     ports:
-    - "8123:8123"
+      - "8123:8123"
+  mosquitto:
+    stdin_open: true
+    tty: true
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /mosquitto/data
+      - /mosquitto/log
+    image: eclipse-mosquitto
   zigbee2mqtt:
     container_name: zigbee2mqtt
     image: koenkk/zigbee2mqtt
