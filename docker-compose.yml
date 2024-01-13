@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "homeassistant/home-assistant:latest"
+    volumes:
+    - /home/media2/docker/home/homeassistant-config:/config
+    - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    privileged: true
+    ports:
+    - "8123:8123"
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: koenkk/zigbee2mqtt
+    restart: unless-stopped
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - /run/udev:/run/udev:ro
+    environment:
+      - TZ=Europe/Berlin
