@@ -11,6 +11,7 @@ services:
     privileged: true
     ports:
       - 8123:8123
+      - 9003:9003
   mosquitto:
     stdin_open: true
     tty: true
