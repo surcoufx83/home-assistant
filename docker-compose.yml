@@ -19,7 +19,6 @@ services:
       - 1883:1883
       - 9002:9001
     volumes:
-      - /home/media2/docker/home/mqtt-config:/mosquitto/config
       - /home/media2/docker/home/mqtt-data:/mosquitto/data
       - /home/media2/docker/home/mqtt-log:/mosquitto/log
     image: eclipse-mosquitto
