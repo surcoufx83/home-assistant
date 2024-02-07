@@ -1,6 +1,7 @@
 version: "3.8"
 
 services:
+
   homeassistant:
     container_name: home-homeassistant
     image: homeassistant/home-assistant:latest
@@ -12,21 +13,25 @@ services:
     ports:
       - 8123:8123
       - 9003:9003
+
   mosquitto:
     stdin_open: true
     tty: true
     container_name: home-mqtt
+    restart: unless-stopped
     ports:
       - 1883:1883
       - 9002:9001
     volumes:
+      - /home/media2/docker/home/mqtt-config:/mosquitto/config
       - /home/media2/docker/home/mqtt-data:/mosquitto/data
       - /home/media2/docker/home/mqtt-log:/mosquitto/log
     image: eclipse-mosquitto
+
   zigbee2mqtt:
     container_name: home-zigbee2mqtt
     image: koenkk/zigbee2mqtt
-    restart: unless-stopped
+    restart: no
     ports:
       - 8080:8080
     volumes:
@@ -34,3 +39,14 @@ services:
       - /run/udev:/run/udev:ro
     environment:
       - TZ=Europe/Berlin
+
+  nodered:
+    container_name: home-nodered
+    image: nodered/node-red
+    restart: no
+    ports:
+      - "1880:1880/tcp"
+    environment:
+      - TZ=Europe/Berlin
+    volumes:
+      - /home/media2/docker/home/nodered-data:/data
