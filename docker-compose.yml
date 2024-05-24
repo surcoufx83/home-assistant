@@ -8,7 +8,6 @@ networks:
         - subnet: 172.18.0.0/16
 
 services:
-
   mosquitto:
     stdin_open: true
     tty: true
@@ -18,35 +17,15 @@ services:
       - 1883:1883
       - 9002:9001
     volumes:
-      - /home/media2/docker/home/mqtt-config:/mosquitto/config
-      - /home/media2/docker/home/mqtt-data:/mosquitto/data
-      - /home/media2/docker/home/mqtt-log:/mosquitto/log
+      - /home/media2/docker/volumes/home/mqtt-config:/mosquitto/config
+      - /home/media2/docker/volumes/home/mqtt-data:/mosquitto/data
+      - /home/media2/docker/volumes/home/mqtt-log:/mosquitto/log
     image: eclipse-mosquitto
     networks:
       default:
         ipv4_address: 172.18.0.3
     healthcheck:
       test: [ "CMD-SHELL", " netstat -an | grep -q 1883" ]
-
-  homeassistant:
-    container_name: home-homeassistant
-    image: homeassistant/home-assistant:latest
-    volumes:
-      - /home/media2/docker/home/homeassistant-config:/config
-      - /etc/localtime:/etc/localtime:ro
-    restart: unless-stopped
-    privileged: true
-    ports:
-      - 8123:8123
-      - 9003:9003
-    networks:
-      default:
-        ipv4_address: 172.18.0.4
-    healthcheck:
-      test: [ "CMD-SHELL", " netstat -an | grep -q 8123" ]
-    depends_on:
-      mosquitto:
-        condition: service_healthy
 
   zigbee2mqtt:
     container_name: home-zigbee2mqtt
@@ -55,7 +34,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - /home/media2/docker/home/zigbee2mqtt-data:/app/data
+      - /home/media2/docker/volumes/home/zigbee2mqtt-data:/app/data
       - /run/udev:/run/udev:ro
     environment:
       - TZ=Europe/Berlin
@@ -68,6 +47,26 @@ services:
       mosquitto:
         condition: service_healthy
 
+  homeassistant:
+    container_name: home-homeassistant
+    image: homeassistant/home-assistant:latest
+    volumes:
+      - /home/media2/docker/volumes/home/homeassistant-config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - 8123:8123
+      - 9003:9003
+    networks:
+      default:
+        ipv4_address: 172.18.0.4
+    healthcheck:
+      test: [ "CMD-SHELL", " netstat -an | grep -q 8123" ]
+    depends_on:
+      zigbee2mqtt:
+        condition: service_healthy
+
   nodered:
     container_name: home-nodered
     image: nodered/node-red
@@ -77,10 +76,11 @@ services:
     environment:
       - TZ=Europe/Berlin
     volumes:
-      - /home/media2/docker/home/nodered-data:/data
+      - /home/media2/docker/volumes/home/nodered-data:/data
+      - /home/media2/dev/smarthome/container/ext_data:/ext_data
     networks:
       default:
         ipv4_address: 172.18.0.2
     depends_on:
-      mosquitto:
+      homeassistant:
         condition: service_healthy
